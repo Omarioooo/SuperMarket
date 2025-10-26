@@ -1,0 +1,9 @@
+﻿global using SuperMarket.Models;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.EntityFrameworkCore;
+global using SuperMarket.Hubs;
+global using Microsoft.AspNetCore.SignalR;
+global using SuperMarket.DTOs;
+global using SuperMarket.Reposetories;
+global using SuperMarket.Services;
+global using Microsoft.AspNetCore.Mvc;
