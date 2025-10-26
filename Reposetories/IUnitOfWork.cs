@@ -8,6 +8,8 @@
         IMarketRepository Markets { get; }
         IProductRepository Products { get; }
 
+        DbSet<MarketProduct> MarketProducts { get; }
+
         Task SaveAsync();
     }
 }

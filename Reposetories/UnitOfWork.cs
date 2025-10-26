@@ -13,6 +13,9 @@ namespace SuperMarket.Reposetories
 
         public IProductRepository Products { get; private set; }
 
+        // Computed Property
+        public DbSet<MarketProduct> MarketProducts => _context.MarketProducts;
+
         public UnitOfWork(Context context)
         {
             _context = context;

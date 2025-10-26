@@ -33,9 +33,13 @@ namespace SuperMarket
                 .AddEntityFrameworkStores<Context>(); ;
 
             // Inject Service
-            builder.Services.AddScoped<INotificationHub, NotificationHub>();
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IUserContextService, UserContextService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<INotificationHub, NotificationHub>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<IMarketService, MarketService>();
 
             builder.Services.Configure<IdentityOptions>(options =>
             {

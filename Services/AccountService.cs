@@ -11,26 +11,30 @@ namespace SuperMarket.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IConfiguration _configuration;
 
         public AccountService(IUnitOfWork unitOfWork, UserManager<AppUser> userManager,
-            RoleManager<IdentityRole<int>> roleManager, SignInManager<AppUser> signInManager, IConfiguration configuration)
+            RoleManager<IdentityRole<int>> roleManager, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
-            _signInManager = signInManager;
             _roleManager = roleManager;
             _configuration = configuration;
         }
 
         public async Task<IdentityResult> RegisterAsync(RegisterDto model)
         {
+            if (model == null)
+                return IdentityResult.Failed(new IdentityError { Description = "Invalid registration data." });
+
+            if (string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+                return IdentityResult.Failed(new IdentityError { Description = "Email and password are required." });
+
             var userName = new MailAddress(model.Email).User;
             var user = new AppUser
             {
-                Email = model.Email,
+                Email = model.Email.ToLowerInvariant(), // Normalize email
                 UserName = userName,
                 CreatedAt = DateTime.UtcNow
             };
@@ -72,12 +76,21 @@ namespace SuperMarket.Services
 
         public async Task<object?> LogInAsync(LoginDto model)
         {
-            AppUser? user;
+            if (model == null || string.IsNullOrWhiteSpace(model.UserNameOrEmail) || string.IsNullOrWhiteSpace(model.Password))
+                return null;
 
-            if (new EmailAddressAttribute().IsValid(model.UserNameOrEmail))
-                user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
+            AppUser? user;
+            string userNameOrEmail = model.UserNameOrEmail.Trim();
+
+            if (new EmailAddressAttribute().IsValid(userNameOrEmail))
+            {
+                // Normalize email to lowercase to match database
+                user = await _userManager.FindByEmailAsync(userNameOrEmail.ToLowerInvariant());
+            }
             else
-                user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
+            {
+                user = await _userManager.FindByNameAsync(userNameOrEmail);
+            }
 
             if (user == null)
                 return null;
@@ -85,6 +98,7 @@ namespace SuperMarket.Services
             if (!await _userManager.CheckPasswordAsync(user, model.Password))
                 return null;
 
+            // Rest of the method remains unchanged
             var claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
@@ -94,13 +108,21 @@ namespace SuperMarket.Services
             foreach (var role in roles)
                 claims.Add(new Claim(ClaimTypes.Role, role));
 
-            // Create JWT Token
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            var secretKey = _configuration["Jwt:SecretKey"];
+            if (string.IsNullOrEmpty(secretKey) || Encoding.UTF8.GetBytes(secretKey).Length < 32)
+                throw new InvalidOperationException("JWT SecretKey is missing or too short. It must be at least 32 bytes.");
+
+            var issuer = _configuration["Jwt:Issuer"];
+            var audience = _configuration["Jwt:Audience"];
+            if (string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience))
+                throw new InvalidOperationException("JWT Issuer or Audience is missing.");
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
                 claims: claims,
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
             );
@@ -111,6 +133,16 @@ namespace SuperMarket.Services
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token.ValidTo
             };
+        }
+
+        public async Task<AppUser> FindByEmailAsync(string mail)
+        {
+            return await _userManager.FindByEmailAsync(mail);
+        }
+
+        public async Task<AppUser> FindByNameAsync(string userName)
+        {
+            return await _userManager.FindByNameAsync(userName);
         }
     }
 }
