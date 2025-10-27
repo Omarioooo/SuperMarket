@@ -32,10 +32,15 @@ namespace SuperMarket.Services
                 return IdentityResult.Failed(new IdentityError { Description = "Email and password are required." });
 
             var userName = new MailAddress(model.Email).User;
+
+            using MemoryStream stream = new MemoryStream();
+            await model.Photo.CopyToAsync(stream);
+
             var user = new AppUser
             {
-                Email = model.Email.ToLowerInvariant(), // Normalize email
+                Email = model.Email.ToLowerInvariant(),
                 UserName = userName,
+                Photo = stream.ToArray(),
                 CreatedAt = DateTime.UtcNow
             };
 

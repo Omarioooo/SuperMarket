@@ -2,10 +2,6 @@
 {
     public class NotificationHub : Hub, INotificationHub
     {
-        public async Task SendMessage(int userId, NotificationMessageDto message)
-        {
-            await Clients.User(userId.ToString()).SendAsync("ReceiveNotification", message);
-        }
 
         public async Task SendMessage(List<int> userIds, NotificationMessageDto message)
         {

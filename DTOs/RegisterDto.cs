@@ -13,6 +13,8 @@ namespace SuperMarket.DTOs
         [Required]
         public string Role { get; set; }
 
+        public IFormFile? Photo { get; set; }
+
         // Client
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

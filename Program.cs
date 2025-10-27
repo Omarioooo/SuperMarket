@@ -40,6 +40,7 @@ namespace SuperMarket
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<IMarketService, MarketService>();
+            builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.Configure<IdentityOptions>(options =>
             {

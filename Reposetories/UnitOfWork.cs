@@ -12,9 +12,11 @@ namespace SuperMarket.Reposetories
         public IMarketRepository Markets { get; private set; }
 
         public IProductRepository Products { get; private set; }
+        public INotificationTypeRepository NotificationTypes { get; private set; }
 
         // Computed Property
         public DbSet<MarketProduct> MarketProducts => _context.MarketProducts;
+        public DbSet<Subscription> Subscriptions => _context.Subscriptions;
 
         public UnitOfWork(Context context)
         {
@@ -23,6 +25,7 @@ namespace SuperMarket.Reposetories
             Clients = new ClientRepository(_context);
             Markets = new MarketRepository(_context);
             Products = new ProductRepository(_context);
+            NotificationTypes = new NotificationTypeRepository(_context);
         }
 
         public async Task SaveAsync() => await _context.SaveChangesAsync();

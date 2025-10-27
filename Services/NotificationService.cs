@@ -4,14 +4,14 @@
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly INotificationHub _hub;
 
-        public NotificationService(IUnitOfWork unitOfWork, UserManager<AppUser> userManager,
-            IHubContext<NotificationHub> hubContext)
+        public NotificationService(IUnitOfWork unitOfWork,
+            UserManager<AppUser> userManager, INotificationHub hub)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
-            _hubContext = hubContext;
+            _hub = hub;
         }
 
         public async Task<List<NotificationReceiver>> GetUserNotificationsAsync(int id)
@@ -68,20 +68,19 @@
             await _unitOfWork.Notifications.AddSenderAsync(notificationSender);
 
             // Add Receivers
-            var notificationReceivers = receiverIds.Select(rid => new NotificationReceiver
-            {
-                ReceiverId = rid,
-                Notification = notification
-            }).ToList();
+            var notificationReceivers =
+                receiverIds.Select(rid => new NotificationReceiver
+                {
+                    ReceiverId = rid,
+                    Notification = notification
+                }).ToList();
             await _unitOfWork.Notifications.AddReceiversAsync(notificationReceivers);
 
             // Save all changes
             await _unitOfWork.SaveAsync();
 
             // Send notification
-            await _hubContext.Clients
-                .Users(receiverIds.Select(id => id.ToString()))
-                .SendAsync("ReceiveNotification", messageDto);
+            await _hub.SendMessage(receiverIds, messageDto);
         }
 
         private Task<NotificationMessageDto> CreateMessage(NotificationsTypeEnum type, string senderName)

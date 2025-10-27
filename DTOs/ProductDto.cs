@@ -4,7 +4,7 @@
     {
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
-        public byte[]? Photo { get; set; }
+        public IFormFile? Photo { get; set; }
         public double Price { get; set; }
     }
 

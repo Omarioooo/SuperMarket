@@ -7,24 +7,30 @@
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserContextService _userContext;
+        private readonly INotificationService _notificationService;
 
-        public MarketService(IUnitOfWork unitOfWork, IUserContextService userContext)
+        public MarketService(IUnitOfWork unitOfWork, IUserContextService userContext,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userContext = userContext;
+            _notificationService = notificationService;
         }
 
         // Create New Product
-        public async Task<Product> CreateProductAsync(ProductDto dto)
+        public async Task<Product> CreateProductAsync(ProductDto model)
         {
             int marketId = _userContext.GetCurrentUserId();
 
+            using MemoryStream stream = new MemoryStream();
+            await model.Photo.CopyToAsync(stream);
+
             var product = new Product
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Photo = dto.Photo,
-                Price = dto.Price
+                Name = model.Name,
+                Description = model.Description,
+                Photo = stream.ToArray(),
+                Price = model.Price
             };
 
             await _unitOfWork.Products.AddAsync(product);
@@ -38,6 +44,21 @@
 
             await _unitOfWork.MarketProducts.AddAsync(marketProduct);
             await _unitOfWork.SaveAsync();
+
+            // Notifications Handeler
+            var subscribers = await _unitOfWork.Subscriptions
+            .Where(s => s.MarketId == marketId)
+            .Select(s => s.ClientId)
+            .ToListAsync();
+
+            if (subscribers.Any())
+            {
+                await _notificationService.SendNotificationAsync(
+                    senderId: marketId,
+                    receiverIds: subscribers,
+                    type: NotificationsTypeEnum.NewProduct
+                );
+            }
 
             return product;
         }

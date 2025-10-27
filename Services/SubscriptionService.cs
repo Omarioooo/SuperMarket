@@ -20,25 +20,25 @@
         /// </summary>
         public async Task<bool> SubscribeToMarketAsync(int clientId, int marketId)
         {
-            // 1. Validate client exists
+            // Validate client exists
             var client = await _unitOfWork.Clients.GetAsync(clientId);
             if (client == null)
                 throw new ArgumentException($"Client with ID {clientId} not found");
 
-            // 2. Validate market exists
+            // Validate market exists
             var market = await _unitOfWork.Markets.GetAsync(marketId);
             if (market == null)
                 throw new ArgumentException($"Market with ID {marketId} not found");
 
-            // 3. Check if market is accepted
+            // Check if market is accepted
             if (market.Status != MarketStatus.Accepted)
                 throw new InvalidOperationException("Cannot subscribe to a market that is not accepted");
 
-            // 4. Check if already subscribed
+            // Check if already subscribed
             if (await IsSubscribedAsync(clientId, marketId))
                 throw new InvalidOperationException("Client is already subscribed to this market");
 
-            // 5. Create subscription
+            // Create subscription
             var subscription = new Subscription
             {
                 ClientId = clientId,
@@ -46,29 +46,21 @@
                 CreatedAt = DateTime.UtcNow
             };
 
-            // 6. Add to database (assuming you have a Subscription repository)
-            // Since you don't have it in UnitOfWork, we'll add it directly
+            // Add to database
             _unitOfWork.Clients.GetAsync(clientId).Result.Subscriptions.Add(subscription);
-
-            // Alternative: if you add ISubscriptionRepository to UnitOfWork
-            // await _unitOfWork.Subscriptions.AddAsync(subscription);
-
-            // 7. Save changes
             await _unitOfWork.SaveAsync();
 
-            // 8. ✅ Send notification to market owner
-            // This is the KEY part: Service calls another Service
+            // Notification Service
             try
             {
                 await _notificationService.SendNotificationAsync(
-                    senderId: clientId,              // Client is the sender
+                    senderId: clientId,
                     receiverIds: new List<int> { marketId }, // Market owner receives
                     type: NotificationsTypeEnum.NewSubscribe
                 );
             }
             catch (Exception ex)
             {
-                // Log the error but don't fail the subscription
                 // Notification failure shouldn't break the subscription
                 Console.WriteLine($"Failed to send notification: {ex.Message}");
             }
@@ -76,9 +68,6 @@
             return true;
         }
 
-        /// <summary>
-        /// Unsubscribe a client from a market
-        /// </summary>
         public async Task<bool> UnsubscribeFromMarketAsync(int clientId, int marketId)
         {
             var client = await _unitOfWork.Clients.GetAsync(clientId);
@@ -97,9 +86,6 @@
             return true;
         }
 
-        /// <summary>
-        /// Get all markets a client is subscribed to
-        /// </summary>
         public async Task<List<Market>> GetClientSubscriptionsAsync(int clientId)
         {
             var client = await _unitOfWork.Clients.GetAsync(clientId);
@@ -111,9 +97,6 @@
                 .ToList();
         }
 
-        /// <summary>
-        /// Get all subscribers of a market
-        /// </summary>
         public async Task<List<Client>> GetMarketSubscribersAsync(int marketId)
         {
             var market = await _unitOfWork.Markets.GetAsync(marketId);
@@ -125,9 +108,6 @@
                 .ToList();
         }
 
-        /// <summary>
-        /// Check if a client is subscribed to a market
-        /// </summary>
         public async Task<bool> IsSubscribedAsync(int clientId, int marketId)
         {
             var client = await _unitOfWork.Clients.GetAsync(clientId);
@@ -138,5 +118,4 @@
                 .Any(s => s.MarketId == marketId);
         }
     }
-}
 }
