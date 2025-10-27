@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SuperMarket</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <main class="container">
+        <h1>SuperMarket — Register / Login</h1>
+        <!-- Register Form -->
+        <section class="card">
+            <h2>Register</h2>
+            <form id="register-form">
+                <label>
+                    Email
+                    <input type="email" id="reg-username" required />
+                </label>
+                <label>
+                    Password
+                    <input type="password" id="reg-password" required />
+                </label>
+                <label>
+                    Role
+                    <select id="reg-role">
+                        <option value="client">Client</option>
+                        <option value="market">Market</option>
+                    </select>
+                </label>
+                <div id="market-extra" style="display:none;">
+                    <label>
+                        Market Name
+                        <input type="text" id="reg-market-name" />
+                    </label>
+                    <label>
+                        Market Description
+                        <input type="text" id="reg-market-desc" />
+                    </label>
+                    <label>
+                        Profile Photo
+                        <input type="file" id="reg-photo" accept="image/*" />
+                    </label>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+        </section>
+        <!-- Login Form -->
+        <section class="card">
+            <h2>Login</h2>
+            <form id="login-form">
+                <label>
+                    Username
+                    <input type="text" id="login-username" required />
+                </label>
+                <label>
+                    Password
+                    <input type="password" id="login-password" required />
+                </label>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>

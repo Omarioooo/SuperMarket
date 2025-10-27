@@ -1,0 +1,67 @@
+:root{
+  --bg:#f7f7fb;
+  --card:#fff;
+  --accent:#2b8aef;
+  --muted:#666;
+}
+*{box-sizing:border-box}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  margin:0;
+  background:var(--bg);
+  color:#111;
+}
+.container{
+  max-width:1000px;
+  margin:24px auto;
+  padding:16px;
+}
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+h1{margin:0 0 12px 0; text-transform:capitalize}
+.card{
+  background:var(--card);
+  padding:16px;
+  border-radius:8px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom:16px;
+}
+.grid{
+  display:grid;
+  gap:12px;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+}
+.market-card, .product-card{
+  padding:12px;
+}
+label{
+  display:block;
+  margin-bottom:8px;
+}
+input, select{
+  width:100%;
+  padding:8px;
+  margin-top:6px;
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+button{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+button:disabled{opacity:0.6}
+.card-actions{margin-top:12px}
+.notifications ul{
+  padding-left:18px;
+  margin:0;
+}
+@media (max-width:600px){
+  .row{flex-direction:column; gap:12px; align-items:flex-start}
+}

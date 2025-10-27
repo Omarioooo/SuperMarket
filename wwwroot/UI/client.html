@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Client Account</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <main class="container">
+        <header class="row">
+            <h1>client account</h1>
+            <div>
+                <span id="who"></span>
+                <button id="logout">Logout</button>
+            </div>
+        </header>
+        <!-- Markets Section -->
+        <section id="markets" class="grid"></section>
+        <!-- Notification Section -->
+        <section class="card notifications">
+            <h3>Notifications</h3>
+            <ul id="notifications-list"></ul>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script src="scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+</body>
+
+</html>

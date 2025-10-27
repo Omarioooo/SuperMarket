@@ -64,7 +64,7 @@
         }
 
         // Update Products
-        public async Task<Product?> UpdateProductAsync(int productId, ProductDto dto)
+        public async Task<Product?> UpdateProductAsync(int productId, ProductDto model)
         {
             int marketId = _userContext.GetCurrentUserId();
 
@@ -77,10 +77,13 @@
             if (marketProduct == null)
                 throw new UnauthorizedAccessException("You cannot edit this product.");
 
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.Photo = dto.Photo;
-            product.Price = dto.Price;
+            using MemoryStream stream = new MemoryStream();
+            await model.Photo.CopyToAsync(stream);
+
+            product.Name = model.Name;
+            product.Description = model.Description;
+            product.Photo = stream.ToArray();
+            product.Price = model.Price;
 
             await _unitOfWork.Products.Update(product);
             await _unitOfWork.SaveAsync();
